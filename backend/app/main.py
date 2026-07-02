@@ -1,13 +1,12 @@
 from fastapi import FastAPI
 
-app = FastAPI(title="Knowledge Assistant API")
+from app.api.document import router as document_router
+
+app = FastAPI(title="Personal Knowledge Assistant")
+
+app.include_router(document_router)
 
 
 @app.get("/")
 def root():
-    return {"message": "Knowledge Assistant API is running 🚀"}
-
-
-@app.get("/health")
-def health():
-    return {"status": "healthy"}
+    return {"message": "Knowledge Assistant API"}
