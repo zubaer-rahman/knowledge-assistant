@@ -5,6 +5,9 @@ from fastapi import APIRouter, File, HTTPException, UploadFile
 
 from app.services.document.pdf_loader import PdfLoader
 
+from app.core.dependencies import vector_store
+from app.services.document.document_service import DocumentService
+
 router = APIRouter(
     prefix="/documents",
     tags=["Documents"],
@@ -25,5 +28,12 @@ async def upload_document(file: UploadFile = File(...)):
         shutil.copyfileobj(file.file, buffer)
 
     loader = PdfLoader()
+    document = loader.load(destination)
 
-    return loader.load(destination)
+    service = DocumentService(vector_store)
+    processing_result = service.process(document)
+
+    return {
+        "document": document,
+        "processing": processing_result,
+    }                   

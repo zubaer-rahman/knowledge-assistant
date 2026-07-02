@@ -1,30 +1,33 @@
 from pathlib import Path
 
-import fitz
+import fitz  # PyMuPDF
 
 from app.schemas.document import DocumentResponse
 
 
 class PdfLoader:
-    """Loads a PDF and extracts its text and metadata."""
+    """
+    Responsible only for extracting text and metadata from PDF files.
+
+    Design goals:
+    - Safe file handling
+    - Clean text extraction
+    - Compatible with RAG pipeline (chunking + embeddings)
+    """
 
     def load(self, file_path: str | Path) -> DocumentResponse:
         file_path = Path(file_path)
 
-        pdf = fitz.open(file_path)
+        # Safe context manager ensures file is always closed properly
+        with fitz.open(file_path) as pdf:
 
-        pages: list[str] = []
+            # Extract text from all pages
+            pages = [str(page.get_text("text")).strip() for page in pdf]
 
-        for page in pdf:
-            pages.append(str(page.get_text()))
-
-        document = DocumentResponse(
-            filename=file_path.name,
-            page_count=len(pdf),
-            text="\n".join(pages),
-            metadata=pdf.metadata or {},
-        )
-
-        pdf.close()
-
-        return document
+            # Build structured response
+            return DocumentResponse(
+                filename=file_path.name,
+                page_count=len(pdf),
+                pages=pages,
+                metadata=pdf.metadata or {},
+            )   
