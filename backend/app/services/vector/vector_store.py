@@ -1,7 +1,7 @@
 import faiss
 import numpy as np
 from app.schemas.chunk import Chunk
-
+from app.services.document.search_result import SearchResult
 
 class VectorStore:
     """Stores and retrieves document embeddings."""
@@ -20,16 +20,30 @@ class VectorStore:
         self.index.add(embeddings)
         self.chunks.extend(chunks)
 
-    def search(self, embedding, k: int = 5) -> list[Chunk]:
+    def search(self, embedding, k: int = 5) -> list[SearchResult]:
         if self.index is None:
             return []
 
         embedding = np.asarray([embedding], dtype="float32")
 
-        _, indices = self.index.search(embedding, k)
+        distances, indices = self.index.search(embedding, k)
 
-        return [
-    self.chunks[i]
-    for i in indices[0]
-    if i != -1
-]
+        results: list[SearchResult] = []
+
+        for distance, index in zip(
+            distances[0],
+            indices[0],
+        ):
+            if index == -1:
+                continue
+
+            score = 1.0 / (1.0 + float(distance))
+
+            results.append(
+                SearchResult(
+                    chunk=self.chunks[index],
+                    score=score,
+                )
+            )
+
+        return results

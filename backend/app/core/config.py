@@ -20,5 +20,7 @@ class Settings:
         "https://openrouter.ai/api/v1",
     )
 
+    MIN_SEARCH_SCORE: float = float(os.getenv("MIN_SEARCH_SCORE", 0.45))
+
 
 settings = Settings()

@@ -1,6 +1,6 @@
+from app.services.chat.chat_service import ChatService
 from app.services.chat.llm_service import LLMService
 from app.services.chat.prompt_builder import PromptBuilder
-from app.services.chat.chat_service import ChatService
 from app.services.document.search_service import SearchService
 from app.services.vector.vector_store import VectorStore
 
@@ -8,7 +8,7 @@ from app.services.vector.vector_store import VectorStore
 # Shared application state
 vector_store = VectorStore()
 
-# Services
+# Shared services
 search_service = SearchService(vector_store)
 prompt_builder = PromptBuilder()
 llm_service = LLMService()
@@ -20,15 +20,12 @@ chat_service = ChatService(
 )
 
 
-_vector_store = VectorStore()
-
-
 def get_vector_store() -> VectorStore:
-    return _vector_store
+    return vector_store
 
 
 def get_search_service() -> SearchService:
-    return SearchService(get_vector_store())
+    return search_service
 
 
 def get_prompt_builder() -> PromptBuilder:

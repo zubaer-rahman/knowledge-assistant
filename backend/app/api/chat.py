@@ -15,4 +15,7 @@ def chat(
     request: ChatRequest,
     service: ChatService = Depends(get_chat_service),
 ) -> ChatResponse:
-    return service.chat(request.question)
+    return service.chat(
+        question=request.question,
+        history=request.history,
+    )   
